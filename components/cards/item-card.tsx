@@ -7,7 +7,7 @@ import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Item } from '@/types';
-import { formatPrice, calculateDistance } from '@/lib/utils';
+import { formatPrice, calculateDistance, itemTypeToCategory } from '@/lib/utils';
 import { useAppStore } from '@/store/useAppStore';
 import { ScoredItem } from '@/lib/search/score';
 import { generateMatchSnippet } from '@/lib/search/snippets';
@@ -20,7 +20,7 @@ interface ItemCardProps {
 export function ItemCard({ scoredItem, userLocation }: ItemCardProps) {
   const { item } = scoredItem;
   const { isFavorite, addFavorite, removeFavorite } = useAppStore();
-  const isFav = isFavorite(item.id, item.type);
+  const isFav = isFavorite(item.id, itemTypeToCategory(item.type));
   const snippet = generateMatchSnippet(scoredItem);
 
   const distance = userLocation
@@ -51,9 +51,9 @@ export function ItemCard({ scoredItem, userLocation }: ItemCardProps) {
                 e.preventDefault();
                 e.stopPropagation();
                 if (isFav) {
-                  removeFavorite(item.id, item.type);
+                  removeFavorite(item.id, itemTypeToCategory(item.type));
                 } else {
-                  addFavorite(item.id, item.type);
+                  addFavorite(item.id, itemTypeToCategory(item.type));
                 }
               }}
             >

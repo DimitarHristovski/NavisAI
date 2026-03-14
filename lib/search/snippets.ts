@@ -1,4 +1,4 @@
-import { Item, ScoredItem } from './score';
+import { ScoredItem } from './score';
 
 export function generateMatchSnippet(scoredItem: ScoredItem): string {
   const { item, reasons } = scoredItem;

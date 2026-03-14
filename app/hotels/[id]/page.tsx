@@ -10,13 +10,13 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { hotels } from '@/data/hotels';
 import { useAppStore } from '@/store/useAppStore';
-import { formatPrice } from '@/lib/utils';
+import { formatPrice, itemTypeToCategory } from '@/lib/utils';
 
 export default function HotelDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = use(params);
   const hotel = hotels.find(h => h.id === resolvedParams.id);
   const { isFavorite, addFavorite, removeFavorite } = useAppStore();
-  const isFav = hotel ? isFavorite(hotel.id, hotel.type) : false;
+  const isFav = hotel ? isFavorite(hotel.id, itemTypeToCategory(hotel.type)) : false;
 
   if (!hotel) {
     return (
@@ -75,9 +75,9 @@ export default function HotelDetailPage({ params }: { params: Promise<{ id: stri
                 size="icon"
                 onClick={() => {
                   if (isFav) {
-                    removeFavorite(hotel.id, hotel.type);
+                    removeFavorite(hotel.id, itemTypeToCategory(hotel.type));
                   } else {
-                    addFavorite(hotel.id, hotel.type);
+                    addFavorite(hotel.id, itemTypeToCategory(hotel.type));
                   }
                 }}
               >

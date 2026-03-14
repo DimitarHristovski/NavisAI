@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { Search, Filter, Map, List, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -15,8 +15,9 @@ import { Category, SearchFilters } from '@/types';
 import { parseQuery } from '@/lib/search/parseQuery';
 import { scoreItems, sortScoredItems } from '@/lib/search/score';
 import { useAppStore } from '@/store/useAppStore';
+import { itemTypeToCategory } from '@/lib/utils';
 
-export default function SearchPage() {
+function SearchPageContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState(searchParams.get('q') || '');
@@ -57,7 +58,7 @@ export default function SearchPage() {
 
     // Apply category filter
     if (category !== 'all') {
-      filtered = filtered.filter(item => item.type === category);
+      filtered = filtered.filter(item => itemTypeToCategory(item.type) === category);
     }
 
     // Parse query
@@ -215,5 +216,28 @@ export default function SearchPage() {
         </div>
       )}
     </div>
+  );
+}
+
+export default function SearchPage() {
+  return (
+    <Suspense fallback={
+      <div className="container mx-auto px-4 py-8">
+        <div className="space-y-4">
+          <Skeleton className="h-12 w-full" />
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {[1, 2, 3, 4, 5, 6].map((i) => (
+              <div key={i} className="space-y-4">
+                <Skeleton className="h-48 w-full" />
+                <Skeleton className="h-4 w-3/4" />
+                <Skeleton className="h-4 w-1/2" />
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    }>
+      <SearchPageContent />
+    </Suspense>
   );
 }

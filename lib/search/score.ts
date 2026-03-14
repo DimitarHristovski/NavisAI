@@ -1,5 +1,5 @@
 import { Item, SearchFilters, BudgetLevel, Vibe } from '@/types';
-import { calculateDistance } from '@/lib/utils';
+import { calculateDistance, itemTypeToCategory } from '@/lib/utils';
 import { ParsedQuery } from './parseQuery';
 
 export interface ScoredItem {
@@ -112,7 +112,7 @@ export function scoreItems(
     }
 
     // Category filter
-    if (filters.category && item.type !== filters.category) {
+    if (filters.category && itemTypeToCategory(item.type) !== filters.category) {
       continue;
     }
 

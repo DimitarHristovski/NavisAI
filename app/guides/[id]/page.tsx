@@ -10,13 +10,13 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { guides } from '@/data/guides';
 import { useAppStore } from '@/store/useAppStore';
-import { formatPrice } from '@/lib/utils';
+import { formatPrice, itemTypeToCategory } from '@/lib/utils';
 
 export default function GuideDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = use(params);
   const guide = guides.find(g => g.id === resolvedParams.id);
   const { isFavorite, addFavorite, removeFavorite } = useAppStore();
-  const isFav = guide ? isFavorite(guide.id, guide.type) : false;
+  const isFav = guide ? isFavorite(guide.id, itemTypeToCategory(guide.type)) : false;
 
   if (!guide) {
     return (
@@ -66,9 +66,9 @@ export default function GuideDetailPage({ params }: { params: Promise<{ id: stri
                 size="icon"
                 onClick={() => {
                   if (isFav) {
-                    removeFavorite(guide.id, guide.type);
+                    removeFavorite(guide.id, itemTypeToCategory(guide.type));
                   } else {
-                    addFavorite(guide.id, guide.type);
+                    addFavorite(guide.id, itemTypeToCategory(guide.type));
                   }
                 }}
               >

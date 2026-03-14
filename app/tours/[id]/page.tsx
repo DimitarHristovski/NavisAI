@@ -10,13 +10,13 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { tours } from '@/data/tours';
 import { useAppStore } from '@/store/useAppStore';
-import { formatPrice } from '@/lib/utils';
+import { formatPrice, itemTypeToCategory } from '@/lib/utils';
 
 export default function TourDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = use(params);
   const tour = tours.find(t => t.id === resolvedParams.id);
   const { isFavorite, addFavorite, removeFavorite } = useAppStore();
-  const isFav = tour ? isFavorite(tour.id, tour.type) : false;
+  const isFav = tour ? isFavorite(tour.id, itemTypeToCategory(tour.type)) : false;
 
   if (!tour) {
     return (
@@ -75,9 +75,9 @@ export default function TourDetailPage({ params }: { params: Promise<{ id: strin
                 size="icon"
                 onClick={() => {
                   if (isFav) {
-                    removeFavorite(tour.id, tour.type);
+                    removeFavorite(tour.id, itemTypeToCategory(tour.type));
                   } else {
-                    addFavorite(tour.id, tour.type);
+                    addFavorite(tour.id, itemTypeToCategory(tour.type));
                   }
                 }}
               >

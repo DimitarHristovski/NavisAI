@@ -1,8 +1,19 @@
 import { type ClassValue, clsx } from "clsx"
 import { twMerge } from "tailwind-merge"
+import { Category, Item } from "@/types"
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
+}
+
+export function itemTypeToCategory(type: Item['type']): Category {
+  const mapping: Record<Item['type'], Category> = {
+    place: 'places',
+    hotel: 'hotels',
+    tour: 'tours',
+    guide: 'guides',
+  };
+  return mapping[type];
 }
 
 export function formatPrice(price: number | { min: number; max: number }): string {

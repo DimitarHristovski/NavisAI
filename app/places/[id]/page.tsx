@@ -10,13 +10,13 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { places } from '@/data/places';
 import { useAppStore } from '@/store/useAppStore';
-import { formatPrice } from '@/lib/utils';
+import { formatPrice, itemTypeToCategory } from '@/lib/utils';
 
 export default function PlaceDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = use(params);
   const place = places.find(p => p.id === resolvedParams.id);
   const { isFavorite, addFavorite, removeFavorite } = useAppStore();
-  const isFav = place ? isFavorite(place.id, place.type) : false;
+  const isFav = place ? isFavorite(place.id, itemTypeToCategory(place.type)) : false;
 
   if (!place) {
     return (
@@ -77,9 +77,9 @@ export default function PlaceDetailPage({ params }: { params: Promise<{ id: stri
                 size="icon"
                 onClick={() => {
                   if (isFav) {
-                    removeFavorite(place.id, place.type);
+                    removeFavorite(place.id, itemTypeToCategory(place.type));
                   } else {
-                    addFavorite(place.id, place.type);
+                    addFavorite(place.id, itemTypeToCategory(place.type));
                   }
                 }}
               >
