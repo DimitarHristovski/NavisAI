@@ -1,104 +1,114 @@
-import { z } from 'zod';
+import { z } from "zod";
 
-export type Category = 'places' | 'hotels' | 'tours' | 'guides';
+export type LocationPermissionState =
+  | "idle"
+  | "requesting"
+  | "granted"
+  | "denied"
+  | "error"
+  | "unsupported";
 
-export type Vibe = 'family' | 'romantic' | 'nightlife' | 'adventure' | 'cultural' | 'relaxed';
+export type AppCategory =
+  | "all"
+  | "attractions"
+  | "hotels"
+  | "restaurants"
+  | "cafes"
+  | "nightlife";
 
-export type BudgetLevel = 'cheap' | 'mid' | 'luxury';
+export type SortOption =
+  | "best_match"
+  | "closest"
+  | "highest_rated"
+  | "most_popular"
+  | "most_crowded"
+  | "cheapest";
 
-export interface BaseItem {
-  id: string;
-  name: string;
-  city: string;
-  country: string;
+export type Vibe = "family" | "romantic" | "nightlife" | "culture" | "relaxed";
+
+export type DiscoveryMode = "popular_nearby" | "crowded_now" | "quiet_gems";
+
+export type RadiusKm = 1 | 3 | 5 | 10 | 25;
+
+export interface Coordinates {
   lat: number;
   lng: number;
+}
+
+export interface Place {
+  id: string;
+  type: "place";
+  name: string;
+  lat: number;
+  lng: number;
+  address: string;
+  city: string;
+  country: string;
   rating: number;
-  price: number | { min: number; max: number };
-  tags: string[];
+  reviewCount: number;
+  priceLevel: 1 | 2 | 3 | 4;
+  categories: string[];
   description: string;
-  images: string[];
+  image: string;
   source: string;
+  popularityScore: number;
+  crowdedScore: number;
+  distanceKm: number;
 }
 
-export interface Place extends BaseItem {
-  type: 'place';
-  category: 'attraction' | 'museum' | 'park' | 'landmark' | 'restaurant';
+export interface Hotel {
+  id: string;
+  type: "hotel";
+  name: string;
+  lat: number;
+  lng: number;
+  address: string;
+  city: string;
+  country: string;
+  rating: number;
+  reviewCount: number;
+  priceLevel: 1 | 2 | 3 | 4;
+  categories: string[];
+  description: string;
+  image: string;
+  source: string;
+  popularityScore: number;
+  crowdedScore: number;
+  distanceKm: number;
 }
 
-export interface Hotel extends BaseItem {
-  type: 'hotel';
-  stars?: number;
-  amenities: string[];
+export type PlaceLike = Place | Hotel;
+
+export interface Recommendation {
+  item: PlaceLike;
+  reason: string;
+  score: number;
+  mode: DiscoveryMode;
 }
 
-export interface Tour extends BaseItem {
-  type: 'tour';
-  duration: number; // in hours
-  languages: string[];
-  maxGroupSize?: number;
-}
-
-export interface Guide extends BaseItem {
-  type: 'guide';
-  languages: string[];
-  specialties: string[];
-  hourlyRate: number;
-}
-
-export type Item = Place | Hotel | Tour | Guide;
-
-export interface SearchFilters {
-  category?: Category;
-  city?: string;
-  minRating?: number;
-  priceRange?: [number, number];
-  tags?: string[];
-  distance?: number; // in km
-  languages?: string[]; // for guides/tours
-  duration?: number; // for tours, in hours
-  vibe?: Vibe;
-}
-
-export interface SearchQuery {
-  text: string;
-  filters: SearchFilters;
-  sortBy: 'relevance' | 'price' | 'rating' | 'distance';
+export interface Filters {
+  radiusKm: RadiusKm;
+  category: AppCategory;
+  sort: SortOption;
+  vibe: Vibe | "all";
 }
 
 export interface Favorite {
   id: string;
-  type: Category;
+  type: PlaceLike["type"];
   addedAt: number;
 }
 
-export interface ItineraryDay {
-  date: string;
-  morning?: Item;
-  afternoon?: Item;
-  evening?: Item;
-}
-
-export interface Itinerary {
-  city: string;
-  startDate: string;
-  endDate: string;
-  vibe: Vibe;
-  days: ItineraryDay[];
-}
-
-export const SearchQuerySchema = z.object({
-  text: z.string(),
-  filters: z.object({
-    category: z.enum(['places', 'hotels', 'tours', 'guides']).optional(),
-    city: z.string().optional(),
-    minRating: z.number().min(0).max(5).optional(),
-    priceRange: z.tuple([z.number(), z.number()]).optional(),
-    tags: z.array(z.string()).optional(),
-    distance: z.number().optional(),
-    languages: z.array(z.string()).optional(),
-    duration: z.number().optional(),
-    vibe: z.enum(['family', 'romantic', 'nightlife', 'adventure', 'cultural', 'relaxed']).optional(),
-  }),
-  sortBy: z.enum(['relevance', 'price', 'rating', 'distance']),
+export const FiltersSchema = z.object({
+  radiusKm: z.union([z.literal(1), z.literal(3), z.literal(5), z.literal(10), z.literal(25)]),
+  category: z.enum(["all", "attractions", "hotels", "restaurants", "cafes", "nightlife"]),
+  sort: z.enum([
+    "best_match",
+    "closest",
+    "highest_rated",
+    "most_popular",
+    "most_crowded",
+    "cheapest",
+  ]),
+  vibe: z.enum(["all", "family", "romantic", "nightlife", "culture", "relaxed"]),
 });

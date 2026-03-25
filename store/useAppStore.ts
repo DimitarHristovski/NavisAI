@@ -1,72 +1,89 @@
-import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
-import { Favorite, SearchFilters, Category, Itinerary } from '@/types';
+import { create } from "zustand";
+import { persist } from "zustand/middleware";
+import {
+  Coordinates,
+  Favorite,
+  Filters,
+  LocationPermissionState,
+  RadiusKm,
+  AppCategory,
+  SortOption,
+  DiscoveryMode,
+  Vibe,
+} from "@/types";
 
 interface AppState {
+  userCoordinates: Coordinates | null;
+  locationPermission: LocationPermissionState;
+  selectedCityFallback: string;
+  filters: Filters;
+  discoveryMode: DiscoveryMode;
   favorites: Favorite[];
-  searchFilters: SearchFilters;
-  userLocation: { lat: number; lng: number } | null;
-  itinerary: Itinerary | null;
-  
-  addFavorite: (id: string, type: Category) => void;
-  removeFavorite: (id: string, type: Category) => void;
-  isFavorite: (id: string, type: Category) => boolean;
-  setSearchFilters: (filters: SearchFilters) => void;
-  setUserLocation: (location: { lat: number; lng: number } | null) => void;
-  setItinerary: (itinerary: Itinerary | null) => void;
+
+  setCoordinates: (coords: Coordinates | null) => void;
+  setLocationPermission: (state: LocationPermissionState) => void;
+  setSelectedCityFallback: (city: string) => void;
+  setRadiusKm: (radius: RadiusKm) => void;
+  setCategory: (category: AppCategory) => void;
+  setSort: (sort: SortOption) => void;
+  setVibe: (vibe: Vibe | "all") => void;
+  setDiscoveryMode: (mode: DiscoveryMode) => void;
+  addFavorite: (id: string, type: Favorite["type"]) => void;
+  removeFavorite: (id: string, type: Favorite["type"]) => void;
+  isFavorite: (id: string, type: Favorite["type"]) => boolean;
 }
+
+const defaultFilters: Filters = {
+  radiusKm: 5,
+  category: "all",
+  sort: "best_match",
+  vibe: "all",
+};
 
 export const useAppStore = create<AppState>()(
   persist(
     (set, get) => ({
+      userCoordinates: null,
+      locationPermission: "idle",
+      selectedCityFallback: "Berlin",
+      filters: defaultFilters,
+      discoveryMode: "popular_nearby",
       favorites: [],
-      searchFilters: {},
-      userLocation: null,
-      itinerary: null,
 
-      addFavorite: (id: string, type: Category) => {
-        const favoriteId = `${type}-${id}`;
-        if (!get().isFavorite(id, type)) {
+      setCoordinates: (coords) => set({ userCoordinates: coords }),
+      setLocationPermission: (state) => set({ locationPermission: state }),
+      setSelectedCityFallback: (city) => set({ selectedCityFallback: city }),
+      setRadiusKm: (radius) => set((state) => ({ filters: { ...state.filters, radiusKm: radius } })),
+      setCategory: (category) => set((state) => ({ filters: { ...state.filters, category } })),
+      setSort: (sort) => set((state) => ({ filters: { ...state.filters, sort } })),
+      setVibe: (vibe) => set((state) => ({ filters: { ...state.filters, vibe } })),
+      setDiscoveryMode: (mode) => set({ discoveryMode: mode }),
+
+      addFavorite: (id, type) => {
+        const key = `${type}-${id}`;
+        if (!get().favorites.some((f) => f.id === key)) {
           set((state) => ({
-            favorites: [
-              ...state.favorites,
-              { id: favoriteId, type, addedAt: Date.now() },
-            ],
+            favorites: [...state.favorites, { id: key, type, addedAt: Date.now() }],
           }));
         }
       },
 
-      removeFavorite: (id: string, type: Category) => {
-        const favoriteId = `${type}-${id}`;
-        set((state) => ({
-          favorites: state.favorites.filter((f) => f.id !== favoriteId),
-        }));
+      removeFavorite: (id, type) => {
+        const key = `${type}-${id}`;
+        set((state) => ({ favorites: state.favorites.filter((f) => f.id !== key) }));
       },
 
-      isFavorite: (id: string, type: Category) => {
-        const favoriteId = `${type}-${id}`;
-        return get().favorites.some((f) => f.id === favoriteId);
-      },
-
-      setSearchFilters: (filters: SearchFilters) => {
-        set({ searchFilters: filters });
-      },
-
-      setUserLocation: (location: { lat: number; lng: number } | null) => {
-        set({ userLocation: location });
-      },
-
-      setItinerary: (itinerary: Itinerary | null) => {
-        set({ itinerary });
+      isFavorite: (id, type) => {
+        const key = `${type}-${id}`;
+        return get().favorites.some((f) => f.id === key);
       },
     }),
     {
-      name: 'navis-ai-storage',
+      name: "navisai-store",
       partialize: (state) => ({
         favorites: state.favorites,
-        searchFilters: state.searchFilters,
-        userLocation: state.userLocation,
-        itinerary: state.itinerary,
+        filters: state.filters,
+        selectedCityFallback: state.selectedCityFallback,
       }),
     }
   )
